@@ -2,6 +2,14 @@ import processing.serial.*;
 import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
+import com.twilio.Twilio;
+import com.twilio.rest.api.v2010.account.Message;
+import com.twilio.type.PhoneNumber;
+
+public static final String ACCOUNT_SID = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+public static final String AUTH_TOKEN = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
+
 boolean error = false;
 public void beginSerial() {
   try {
@@ -86,4 +94,12 @@ void serialEvent(Serial microbit) {
   pre[sw] = float(inData[1])/100;
   hum[sw] = int(inData[3]);
   temp[sw] = int(inData[2]);
+
+  if (temp[sw] >= 35) //35度を超えたら
+    Message message = Message.creator(
+      new PhoneNumber("+81908641XXXX"), // 送信先
+      new PhoneNumber("+1"), // Twilioで借りた番号(送信元)
+      name[sw]+" の温度が上昇しています！早急に対応してください．現在の気温は "+temp[sw]+"度\n現在の湿度は"+hum[sw]+"％\n現在の気圧は"+pre[sw]+"hPaです．"
+    ).create();
+
 }
